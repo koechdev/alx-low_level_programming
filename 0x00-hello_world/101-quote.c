@@ -1,10 +1,19 @@
-#include <stdio.h>
 #include <unistd.h>
+
 /**
- * main - A c programme that prints a line to the standard error
- * Return 1 (Success)
+ * main - Entry point
+ *
+ * Return: Always 1 (Error)
  */
 int main(void)
-{fput("and that piece of art is useful\" - Dora Korpar, 2015-10-19\n",stdout);
-return (1);
+{
+    char str[] = "and that piece of art is useful\" - Dora Korpar, 2015-10-19\n";
+    ssize_t len = sizeof(str) - 1;
+    ssize_t ret = write(STDERR_FILENO, str, len);
+
+    if (ret != len)
+        return (1);
+
+    return (1);
 }
+
