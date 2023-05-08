@@ -1,33 +1,57 @@
 #include "main.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <fcntl.h>
 
 /**
- * create_file - Creates a file.
- * @filename: A pointer to the name of the file to create.
- * @text_content: A pointer to a string to write to the file.
+ * read_textfile - reads a text file and prints it to the POSIX standard output
  *
- * Return: If the function fails - -1.
- *         Otherwise - 1.
+ * @filename: pointer to the name of the file to be read
+ * @letters: number of letters to read and print
+ *
+ * Return: the actual number of letters read and printed, 0 if function fails
  */
-int create_file(const char *filename, char *text_content)
+ssize_t read_textfile(const char *filename, size_t letters)
 {
-	int fd, w, len = 0;
+	char *buf;
+	ssize_t file_descriptor, write_return, read_return, total_bytes_read;
 
 	if (filename == NULL)
-		return (-1);
+		return (0);
 
-	if (text_content != NULL)
+	file_descriptor = open(filename, O_RDONLY);
+	if (file_descriptor == -1)
+		return (0);
+
+	buf = malloc(sizeof(char) * letters);
+	if (buf == NULL)
 	{
-		for (len = 0; text_content[len];)
-			len++;
+		close(file_descriptor);
+		return (0);
 	}
 
-	fd = open(filename, O_CREAT | O_RDWR | O_TRUNC, 0600);
-	w = write(fd, text_content, len);
+	read_return = read(file_descriptor, buf, letters);
+	if (read_return == -1)
+	{
+		free(buf);
+		close(file_descriptor);
+		return (0);
+	}
 
-	if (fd == -1 || w == -1)
-		return (-1);
+	write_return = write(STDOUT_FILENO, buf, read_return);
+	if (write_return == -1 || write_return != read_return)
+	{
+		free(buf);
+		close(file_descriptor);
+		return (0);
+	}
 
-	close(fd);
+	total_bytes_read = (ssize_t)read_return;
 
-	return (1);
+	free(buf);
+	close(file_descriptor);
+
+	return (total_bytes_read);
 }
+
